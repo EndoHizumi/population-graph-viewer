@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxt/eslint": "^1.2.0",
     "@tailwindcss/vite": "^4.0.16",
+    "embla-carousel": "^8.5.2",
     "embla-carousel-vue": "^8.5.2",
     "eslint": "^9.23.0",
     "highcharts": "^12.1.2",
