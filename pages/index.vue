@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { EmblaCarouselType } from 'embla-carousel';
 import emblaCarouselVue from 'embla-carousel-vue'
+import { type PopulationCompositionPerYear, type PopulationDataItem, type Prefecture, type YearlyData } from '~/types/response';
 
+import type { Chart } from 'highcharts';
+
+const chartRef = ref<{ chart: Chart }>();
 const canScrollPrev = ref(false);
 const canScrollNext = ref(false);
 const [emblaRef, emblaApi] = emblaCarouselVue();
-const prefecturesList = [
-  { "prefCode": 1, "prefName": "北海道" },
-  { "prefCode": 2, "prefName": "青森県" }
-];
-const chartOptions = {
+const { data: prefectureData } = await useFetch<Prefecture>('/api/v1/prefectures');
+const prefecturesList = ref(prefectureData.value);
+const selectedPrefectures = ref<number[]>([]);
+let index = 0;
   chart: {
     type: 'line'
   },
@@ -42,6 +45,8 @@ function scrollPrev() {
 function updateButtonStates(emblaApi: EmblaCarouselType) {
   canScrollPrev.value = emblaApi.canScrollPrev();
   canScrollNext.value = emblaApi.canScrollNext();
+  index = emblaApi.selectedScrollSnap();
+  setSeries();
 }
 
 onMounted(() => {
@@ -49,10 +54,45 @@ onMounted(() => {
 
   updateButtonStates(emblaApi.value);
   emblaApi.value.on("select", updateButtonStates);
-})
+});
+watch(selectedPrefectures, () => { console.log('selectedPrefectures'); setSeries(); }, { deep: true })
 
-const onClick = (id: number) => {
-  console.log(id);
+let populationList = ref<PopulationDataItem[]>([]);
+const getPopulationCompositionPerYear = async (prefCode: number) => {
+  const { data: populationData } = await $fetch<PopulationCompositionPerYear>(`/api/v1/population/?prefCode=${prefCode}`);
+  populationList.value = populationData.map((item: any) => {
+    return item.data.map((data: YearlyData) => {
+      return {
+        x: data.year,
+        y: data.value,
+      }
+    })
+  })
+}
+
+const setSeries = () => {
+  selectedPrefectures.value.forEach(async (id) => {
+    await getPopulationCompositionPerYear(id);
+    chartOptions.series.push({
+      id,
+      type: 'line',
+      showInLegend: false,
+      name: prefecturesList.value?.find(p => p.prefCode === id)?.prefName || '都道府県データ',
+      color: prefecturesMap[id].color,
+      data: populationList.value[index]
+    });
+  })
+}
+
+const onClick = async (event: { id: number, isClicked: boolean }) => {
+  const { id, isClicked } = event;
+  console.log('onClick', id, isClicked);
+  if (!isClicked) {
+    selectedPrefectures.value.splice(selectedPrefectures.value.indexOf(id), 1);
+    return;
+  }
+  selectedPrefectures.value.push(id);
+  console.log('selectedPrefectures', selectedPrefectures);
 }
 </script>
 
@@ -65,8 +105,10 @@ const onClick = (id: number) => {
     </div>
     <div class="content flex flex-row">
       <div class="chart flex-2 flex flex-col m-[10px] gap-2 relative">
-        <div class="h-1/2">
-          <highcharts :options="chartOptions" class="w-full h-full" />
+        <div class="chart-container">
+          <client-only>
+            <highcharts :options="chartOptions" ref="chartRef" />
+          </client-only>
         </div>
         <button @click="scrollPrev" :disabled="!canScrollPrev" class="embla__button embla__button--prev"><</button>
         <div class="embla" ref="emblaRef">
@@ -78,8 +120,23 @@ const onClick = (id: number) => {
           </div>
         </div>
         <button @click="scrollNext" :disabled="!canScrollNext" class="embla__button embla__button--next">></button>
-        <div class="detail flex-1 flex justify-center items-center text-2xl text-gray-400">
-          ここに選択した都道府県のデータが表示されます
+            <div class="detail flex-1 flex flex-col text-2xl text-gray-400">
+              <div class="text-gray-400 w-full">選択した都道府県の人口推移</div>
+                <table class="population-table">
+                  <thead>
+                    <tr>
+                      <th>年度</th>
+                      <th>人口</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 実際の年データが利用可能な場合 -->
+                    <tr v-for="(yearData, yearIndex) in populationList[index]" :key="yearIndex">
+                      <td>{{ yearData.x }}</td>
+                      <td>{{ yearData.y }}</td>
+                    </tr>
+                  </tbody>
+                </table>
         </div>
       </div>
       <div class="side-bar mt-2">
