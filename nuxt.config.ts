@@ -14,4 +14,8 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+  runtimeConfig: {
+    RESAS_API_KEY: process.env.API_KEY,
+    RESAS_API_ENDPOINT: process.env.API_ENDPOINT,
+  },
 })
