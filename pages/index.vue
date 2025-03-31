@@ -191,7 +191,7 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
 <style scoped>
 /* コンテナ全体のスタイル */
 .container {
-  width: 100vw;
+  max-width: 100vw;
   max-height: 100vh;
   background-color: #f7f5f7;
   display: flex;
