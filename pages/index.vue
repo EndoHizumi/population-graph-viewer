@@ -6,13 +6,15 @@ import { type PopulationCompositionPerYear, type PopulationDataItem, type Prefec
 import type { Chart } from 'highcharts';
 
 const chartRef = ref<{ chart: Chart }>();
+const [emblaRef, emblaApi] = emblaCarouselVue();
 const canScrollPrev = ref(false);
 const canScrollNext = ref(false);
 const [emblaRef, emblaApi] = emblaCarouselVue();
 const { data: prefectureData } = await useFetch<Prefecture>('/api/v1/prefectures');
 const prefecturesList = ref(prefectureData.value);
 const selectedPrefectures = ref<number[]>([]);
-let index = 0;
+let currentPage = 0;
+const chartOptions = reactive({
   chart: {
     type: 'line'
   },
@@ -27,33 +29,21 @@ let index = 0;
       text: '値'
     }
   },
-  series: [{
-    showInLegend: false,
-    name: 'データ1',
-    data: [10, 20, 15, 25, 30]
-  }]
+const updateButtons = () => {
+  canScrollPrev.value = emblaApi?.value!.canScrollPrev();
+  canScrollNext.value = emblaApi?.value!.canScrollNext();
 }
 
-function scrollNext() {
-  emblaApi?.value!.scrollNext();
-}
-
-function scrollPrev() {
-  emblaApi?.value!.scrollPrev();
-}
-
-function updateButtonStates(emblaApi: EmblaCarouselType) {
-  canScrollPrev.value = emblaApi.canScrollPrev();
-  canScrollNext.value = emblaApi.canScrollNext();
-  index = emblaApi.selectedScrollSnap();
+const changePage = (emblaApi: EmblaCarouselType) => {
+  updateButtons();
+  currentPage = emblaApi.selectedScrollSnap();
   setSeries();
 }
 
 onMounted(() => {
   if (!emblaApi.value) return;
-
-  updateButtonStates(emblaApi.value);
-  emblaApi.value.on("select", updateButtonStates);
+  emblaApi.value.on("select", changePage);
+updateButtons()
 });
 watch(selectedPrefectures, () => { console.log('selectedPrefectures'); setSeries(); }, { deep: true })
 
@@ -110,7 +100,9 @@ const onClick = async (event: { id: number, isClicked: boolean }) => {
             <highcharts :options="chartOptions" ref="chartRef" />
           </client-only>
         </div>
-        <button @click="scrollPrev" :disabled="!canScrollPrev" class="embla__button embla__button--prev"><</button>
+        <div class="wrapper relative">
+          <button @click="emblaApi?.scrollPrev()" :disabled="!canScrollPrev" class="embla__button embla__button--prev"><</button>
+          <button @click="emblaApi?.scrollNext()" :disabled="!canScrollNext" class="embla__button embla__button--next">></button>
         <div class="embla" ref="emblaRef">
           <div class="embla__container">
             <div class="embla__slide">総人口</div>
@@ -119,10 +111,7 @@ const onClick = async (event: { id: number, isClicked: boolean }) => {
             <div class="embla__slide">老年人口</div>
           </div>
         </div>
-        <button @click="scrollNext" :disabled="!canScrollNext" class="embla__button embla__button--next">></button>
-            <div class="detail flex-1 flex flex-col text-2xl text-gray-400">
-              <div class="text-gray-400 w-full">選択した都道府県の人口推移</div>
-                <table class="population-table">
+        </div>
                   <thead>
                     <tr>
                       <th>年度</th>
@@ -185,9 +174,6 @@ const onClick = async (event: { id: number, isClicked: boolean }) => {
   cursor: pointer;
   position: absolute;
   z-index: 1;
-  top: 49.4%;
-  font-weight: bold;
-  font-size: 2rem;
 }
 
 .embla__button--prev {
