@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxt/eslint'],
+  modules: ['@nuxt/eslint','@pinia/nuxt'],
   plugins: [
     { src: '~/plugins/highcharts.ts', mode: 'client' }
   ],
