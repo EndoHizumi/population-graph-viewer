@@ -12,7 +12,7 @@ const [emblaRef, emblaApi] = emblaCarouselVue();
 const canScrollPrev = ref(false);
 const canScrollNext = ref(true);
 
-let currentPage = 0;
+const currentPage = ref(0);
 
 const chartOptions = reactive({
   chart: {
@@ -44,7 +44,7 @@ const updateButtons = () => {
 
 const changePage = (emblaApi: EmblaCarouselType) => {
   updateButtons();
-  currentPage = emblaApi.selectedScrollSnap();
+  currentPage.value = emblaApi.selectedScrollSnap();
   setSeries();
 }
 
@@ -76,15 +76,15 @@ onBeforeUnmount(() => {
 
 const setSeries = async () => {
   chartOptions.series = [];
-  prefectureStore.selectedPrefectures.map(async (id) => await prefectureStore.fetchPopulationData(id));
+  await Promise.all(prefectureStore.selectedPrefectures.map(async (id) => await prefectureStore.fetchPopulationData(id)));
   prefectureStore.selectedPrefectures.forEach(async (id) => {
-    if (prefectureStore.populationData[id] && prefectureStore.populationData[id][currentPage]) {
+    if (prefectureStore.populationData[id] && prefectureStore.populationData[id][currentPage.value]) {
       chartOptions.series.push({
         id,
         type: 'line',
         showInLegend: false,
         name: prefectureStore.prefecturesList?.find(p => p.prefCode === id)?.prefName || '都道府県データ',
-        data: prefectureStore.populationData[id][currentPage].data
+        data: prefectureStore.populationData[id][currentPage.value].data
       });
     }
     if (prefectureStore.populationData[id]) {
