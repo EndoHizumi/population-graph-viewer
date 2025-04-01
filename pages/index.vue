@@ -18,11 +18,7 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
 
 <template>
   <div class="container w-full">
-    <div class="header w-full bg-white m-0 text-3xl pl-4 text-black-200">
-      <span class="title-color text-center align-baseline font-bold">
-        population-graph-viewer
-      </span>
-    </div>
+    <app-header></app-header>
     <div class="content flex flex-row">
       <div class="chart flex-2 flex flex-col m-[10px] gap-2 relative">
         <pref-chart/>
@@ -73,9 +69,7 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
   flex-direction: column;
 }
 
-.header {
-  height: 30px;
-}
+
 
 /* サイドバー */
 .side-bar {
