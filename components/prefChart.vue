@@ -90,8 +90,9 @@ const setSeries = async () => {
     if (prefectureStore.populationData[id]) {
     }
   });
-  if(prefectureStore.populationData[1] && prefectureStore.populationData[1][0]) {
-    chartOptions.xAxis.categories = prefectureStore.populationData[1][0].data.map((data: YearlyData) => {
+  const firstSelectedPrefecture = prefectureStore.selectedPrefectures[0];
+  if (prefectureStore.populationData[firstSelectedPrefecture] && prefectureStore.populationData[firstSelectedPrefecture][0]) {
+    chartOptions.xAxis.categories = prefectureStore.populationData[firstSelectedPrefecture][0].data.map((data: YearlyData) => {
       return data.year.toString();
     });
   }
