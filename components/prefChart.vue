@@ -76,8 +76,7 @@ onBeforeUnmount(() => {
 
 const setSeries = async () => {
   chartOptions.series = [];
-  const promises = prefectureStore.selectedPrefectures.map(id => prefectureStore.fetchPopulationData(id));
-  await Promise.all(promises);
+  const promises = prefectureStore.selectedPrefectures.map(async (id) => await prefectureStore.fetchPopulationData(id));
   prefectureStore.selectedPrefectures.forEach(async (id) => {
     if (prefectureStore.populationData[id] && prefectureStore.populationData[id][currentPage]) {
       chartOptions.series.push({
@@ -89,10 +88,10 @@ const setSeries = async () => {
       });
     }
     if (prefectureStore.populationData[id]) {
-    chartOptions.xAxis.categories = prefectureStore.populationData[id][0].data.map((data: YearlyData) => {
-      return data.year.toString();
-    });
-  }
+    }
+  });
+  chartOptions.xAxis.categories = prefectureStore.populationData[1][0].data.map((data: YearlyData) => {
+    return data.year.toString();
   });
 }
 
