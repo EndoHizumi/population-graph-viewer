@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import PrefChart from '../prefChart.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { usePrefectureStore } from '../../stores/prefecture'
@@ -54,9 +54,19 @@ const mockPopulationDataItem: PopulationDataItem = {
   data: mockYearlyData
 }
 
-const mockPopulationData: Record<number, PopulationDataItem[]> = {
-  1: [mockPopulationDataItem],
-  2: [mockPopulationDataItem]
+const mockPopulationData: {[prefCode: number]: {[key: string]: PopulationDataItem}} = {
+  1: {
+    '0': mockPopulationDataItem,
+    '1': mockPopulationDataItem,
+    '2': mockPopulationDataItem,
+    '3': mockPopulationDataItem
+  },
+  2: {
+    '0': mockPopulationDataItem,
+    '1': mockPopulationDataItem,
+    '2': mockPopulationDataItem,
+    '3': mockPopulationDataItem
+  }
 }
 
 const mockPrefecturesList: Prefecture[] = [
@@ -98,7 +108,12 @@ describe('PrefChart', () => {
     store = usePrefectureStore()
     // ストアのメソッドをモック
     store.fetchPopulationData = vi.fn().mockImplementation(async (prefCode: number) => {
-      store.populationData[prefCode] = [mockPopulationDataItem]
+      store.populationData[prefCode] = {
+        '0': mockPopulationDataItem,
+        '1': mockPopulationDataItem,
+        '2': mockPopulationDataItem,
+        '3': mockPopulationDataItem
+      }
     })
   })
 
@@ -140,18 +155,72 @@ describe('PrefChart', () => {
   })
 
   describe('3. カルーセル機能', () => {
-    it('3.1 ナビゲーションボタンが機能する', async () => {
-      const vm = wrapper.vm as any
-      const nextButton = wrapper.find('.embla__button--next')
-      await nextButton.trigger('click')
-      await vm.changePage(mockEmblaApi)
-      expect(vm.currentPage).toBe(1)
+    it('3.1 すべてのスライドが正しく表示される', () => {
+      const slides = wrapper.findAll('.embla__slide')
+      expect(slides).toHaveLength(4)
+      expect(slides[0].text()).toBe('総人口')
+      expect(slides[1].text()).toBe('年少人口')
+      expect(slides[2].text()).toBe('生産年齢人口')
+      expect(slides[3].text()).toBe('老年人口')
     })
 
-    it('3.2 データ切り替えが正しく動作する', async () => {
+    it('3.2 ナビゲーションボタンの状態が正しく管理される', async () => {
       const vm = wrapper.vm as any
-      await vm.changePage({ selectedScrollSnap: () => 1 })
-      expect(vm.currentPage).toBe(1)
+      
+      // 初期状態
+      expect(vm.canScrollPrev).toBe(false)
+      expect(vm.canScrollNext).toBe(true)
+
+      // 次へボタンクリック後
+      mockEmblaApi.canScrollPrev.mockReturnValue(true)
+      mockEmblaApi.canScrollNext.mockReturnValue(true)
+      await wrapper.find('.embla__button--next').trigger('click')
+      await vm.updateButtons()
+      expect(vm.canScrollPrev).toBe(true)
+      expect(vm.canScrollNext).toBe(true)
+
+      // 最後のスライドへ
+      mockEmblaApi.canScrollNext.mockReturnValue(false)
+      await vm.updateButtons()
+      expect(vm.canScrollNext).toBe(false)
+    })
+
+    it('3.3 スライド切り替え時にストアが更新される', async () => {
+      const vm = wrapper.vm as any
+      await vm.changePage(mockEmblaApi)
+      expect(store.currentTab).toBe(1)
+      expect(mockEmblaApi.selectedScrollSnap).toHaveBeenCalled()
+    })
+
+    it('3.4 スライド切り替え時にデータが更新される', async () => {
+      const vm = wrapper.vm as any
+      
+      // 初期データを設定
+      store.selectedPrefectures = [1]
+      store.populationData = mockPopulationData
+      
+      // スライド切り替えを実行
+      await vm.changePage(mockEmblaApi)
+      
+      // 非同期処理の完了を待つ
+      await nextTick()
+      
+      // 検証
+      expect(store.currentTab).toBe(1)
+      
+      // setSeriesの効果を検証
+      expect(vm.chartOptions.series).toBeDefined()
+      expect(Array.isArray(vm.chartOptions.series)).toBe(true)
+      
+      // データが正しく更新されているか確認
+      await vm.setSeries()
+      const series = vm.chartOptions.series[0]
+      expect(series).toBeDefined()
+      expect(series.id).toBe(1)
+      expect(series.name).toBe('北海道')
+      expect(series.type).toBe('line')
+      expect(series.data).toBeDefined()
+      expect(Array.isArray(series.data)).toBe(true)
     })
   })
 

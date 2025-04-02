@@ -5,8 +5,10 @@ import type { Prefecture, PopulationDataItem } from '~/types/response'
 export const usePrefectureStore = defineStore('prefecture', () => {
   const selectedPrefectures = ref<number[]>([])
   const prefecturesList = ref<Prefecture[] | null>(null)
-  const populationData = ref<Record<number, PopulationDataItem[]>>({})
+  const populationData = ref<{[prefCode: number]: {[key: string]: PopulationDataItem}}>({})
   const isLoading = ref(false)
+  const currentTab = ref(0)
+  const yearList = ref<string[]>([])
 
   const fetchPopulationData = async (prefCode: number) => {
     if (populationData.value[prefCode]) {
@@ -29,6 +31,8 @@ export const usePrefectureStore = defineStore('prefecture', () => {
     prefecturesList,
     populationData,
     isLoading,
+    currentTab,
+    yearList,
     fetchPopulationData
   }
 })

@@ -12,8 +12,6 @@ const [emblaRef, emblaApi] = emblaCarouselVue();
 const canScrollPrev = ref(false);
 const canScrollNext = ref(true);
 
-const currentPage = ref(0);
-
 const chartOptions = reactive({
   chart: {
     reflow: true,
@@ -44,7 +42,7 @@ const updateButtons = () => {
 
 const changePage = (emblaApi: EmblaCarouselType) => {
   updateButtons();
-  currentPage.value = emblaApi.selectedScrollSnap();
+  prefectureStore.currentTab = emblaApi.selectedScrollSnap();
   setSeries();
 }
 
@@ -78,13 +76,13 @@ const setSeries = async () => {
   chartOptions.series = [];
   await Promise.all(prefectureStore.selectedPrefectures.map(async (id) => await prefectureStore.fetchPopulationData(id)));
   prefectureStore.selectedPrefectures.forEach(async (id) => {
-    if (prefectureStore.populationData[id] && prefectureStore.populationData[id][currentPage.value]) {
+    if (prefectureStore.populationData[id] && prefectureStore.populationData[id][prefectureStore.currentTab]) {
       chartOptions.series.push({
         id,
         type: 'line',
         showInLegend: false,
         name: prefectureStore.prefecturesList?.find(p => p.prefCode === id)?.prefName || '都道府県データ',
-        data: prefectureStore.populationData[id][currentPage.value].data
+        data: prefectureStore.populationData[id][prefectureStore.currentTab].data
       });
     }
     if (prefectureStore.populationData[id]) {
@@ -92,9 +90,10 @@ const setSeries = async () => {
   });
   const firstSelectedPrefecture = prefectureStore.selectedPrefectures[0];
   if (prefectureStore.populationData[firstSelectedPrefecture] && prefectureStore.populationData[firstSelectedPrefecture][0]) {
-    chartOptions.xAxis.categories = prefectureStore.populationData[firstSelectedPrefecture][0].data.map((data: YearlyData) => {
+    prefectureStore.yearList = prefectureStore.populationData[firstSelectedPrefecture][0].data.map((data: YearlyData) => {
       return data.year.toString();
     });
+    chartOptions.xAxis.categories = prefectureStore.yearList;
   }
 }
 
@@ -169,5 +168,13 @@ const setSeries = async () => {
 
 .embla__button--next {
   right: 27px;
+}
+
+.embla__button--prev:disabled {
+  opacity: 0.5;
+}
+
+.embla__button--next:disabled {
+  opacity: 0.5;
 }
 </style>
