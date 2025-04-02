@@ -22,32 +22,7 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
     <div class="content flex flex-row">
       <div class="chart flex-2 flex flex-col m-[10px] gap-2 relative">
         <pref-chart/>
-        <div class="detail flex-1 flex flex-col text-2xl text-gray-400 text-center">
-          <span v-if="selectedPrefectures.length <= 0">都道府県を選択してください</span>
-          <div v-else-if="isLoading">
-            データを読み込み中...
-          </div>
-          <table v-else class="w-full">
-            <thead>
-              <tr class="border-1">
-                <th class="border-1">年号</th>
-                <th class="border-1"  v-for="(id, index) in selectedPrefectures" :key="index">
-                  {{prefecturesList?.find(p => p.prefCode === id)?.prefName}}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="text-right">
-              <tr class="border-1" v-for="(year, rowIndex) in chartOptions.xAxis.categories" :key="rowIndex">
-                <td class="border-1">
-                  {{ year }}
-                </td>
-                <td class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
-                  {{populationList[id][currentPage][rowIndex]}}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <pref-table/>
       </div>
         <div class="side-bar mt-2">
           <div class="side-bar-item-content flex flex-col gap-2 pt-4 justify-center items-center">
