@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { usePrefectureStore } from '~/stores/prefecture'
-import { computed } from 'vue';
-
+import { ref, watch, computed } from 'vue';
 const prefectureStore = usePrefectureStore();
 
 const isLoading = ref(false);
