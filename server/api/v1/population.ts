@@ -27,6 +27,6 @@ export default defineEventHandler(async (event) => {
     
   } catch (error) {
     console.error('人口構成データ取得エラー:', error);
-    throw new Error(`API error: ${error}`);
+    throw error;
   }
 });

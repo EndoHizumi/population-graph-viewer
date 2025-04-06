@@ -2,15 +2,25 @@
 import { usePrefectureStore } from '~/stores/prefecture'
 import type { EmblaCarouselType } from 'embla-carousel';
 import emblaCarouselVue from 'embla-carousel-vue'
-import { type PopulationDataItem, type YearlyData } from '~/types/response';
 import type { Chart } from 'highcharts';
 import { onMounted, onBeforeUnmount, ref, reactive, nextTick } from 'vue';
+import type { YearlyData } from '~/types/response';
+import { computed } from 'vue';
 
 const prefectureStore = usePrefectureStore();
 const chartRef = ref<{ chart: Chart }>();
 const [emblaRef, emblaApi] = emblaCarouselVue();
 const canScrollPrev = ref(false);
 const canScrollNext = ref(true);
+
+const populationData = computed(() => prefectureStore.populationData);
+const prefecturesList = computed(() => prefectureStore.prefecturesList);
+const yearList = computed(() => prefectureStore.yearList);
+const currentTab = computed(() => prefectureStore.currentTab);
+const selectedPrefectures = computed(() => prefectureStore.selectedPrefectures);
+
+watch(selectedPrefectures, async () => { await setSeries(); }, { deep: true });
+watch(currentTab, async () => { await setSeries(); }, { deep: true });
 
 const chartOptions = reactive({
   chart: {
@@ -30,7 +40,8 @@ const chartOptions = reactive({
       text: '人口'
     }
   },
-  series: [] as any[]
+  series: [] as any[],
+  accessibility: { enabled: false }
 })
 
 const updateButtons = () => {
@@ -74,48 +85,68 @@ onBeforeUnmount(() => {
 
 const setSeries = async () => {
   chartOptions.series = [];
-  await Promise.all(prefectureStore.selectedPrefectures.map(async (id) => await prefectureStore.fetchPopulationData(id)));
-  prefectureStore.selectedPrefectures.forEach(async (id) => {
-    if (prefectureStore.populationData[id] && prefectureStore.populationData[id][prefectureStore.currentTab]) {
-      chartOptions.series.push({
-        id,
-        type: 'line',
-        showInLegend: false,
-        name: prefectureStore.prefecturesList?.find(p => p.prefCode === id)?.prefName || '都道府県データ',
-        data: prefectureStore.populationData[id][prefectureStore.currentTab].data
-      });
-    }
-    if (prefectureStore.populationData[id]) {
+  await Promise.all(selectedPrefectures.value.map(async (id) => await prefectureStore.fetchPopulationData(id)));
+  if (chartOptions.xAxis.categories.length === 0) {
+    chartOptions.xAxis.categories = yearList.value;
+  }
+
+  selectedPrefectures.value.forEach(async (id) => {
+
+    const boundaryYear = populationData.value[id].boundaryYear;
+    const dataName = prefecturesList.value?.find(p => p.prefCode === id)?.prefName || '都道府県データ'
+
+    if (populationData.value[id]) {
+      const chartData1 = populationData.value[id].data[prefectureStore.currentTab].data.filter((item: YearlyData) => item.year <= boundaryYear).map(
+        (item: YearlyData) => ({ x: item.year, y: item.value }))
+      const chartData2 = populationData.value[id].data[prefectureStore.currentTab].data.filter((item: YearlyData) => item.year >= boundaryYear).map(
+        (item: YearlyData) => ({ x: item.year, y: item.value })
+      );
+
+      chartOptions.series.push(
+        {
+          id,
+          type: 'line',
+          showInLegend: false,
+          name: dataName,
+          data: chartData1,
+          color: prefecturesMap[id].color,
+          dashStyle: 'Solid',
+          linkedTo: `${id}-expect`,
+        },
+        {
+          id: `${id}-expect`,
+          type: 'line',
+          showInLegend: false,
+          name: `${dataName}(予測値)`,
+          data: chartData2,
+          color: prefecturesMap[id].color,
+          dashStyle: 'Dash',
+        });
     }
   });
-  const firstSelectedPrefecture = prefectureStore.selectedPrefectures[0];
-  if (prefectureStore.populationData[firstSelectedPrefecture] && prefectureStore.populationData[firstSelectedPrefecture][0]) {
-    prefectureStore.yearList = prefectureStore.populationData[firstSelectedPrefecture][0].data.map((data: YearlyData) => {
-      return data.year.toString();
-    });
-    chartOptions.xAxis.categories = prefectureStore.yearList;
-  }
 }
 
 </script>
 <template>
-    <div class="chart-container">
-      <client-only>
-        <highcharts :options="chartOptions" ref="chartRef" />
-      </client-only>
-    </div>
-    <div class="wrapper relative">
-      <button @click="emblaApi?.scrollPrev()" :disabled="!canScrollPrev" class="embla__button embla__button--prev">&lt;</button>
-      <button @click="emblaApi?.scrollNext()" :disabled="!canScrollNext" class="embla__button embla__button--next">&gt;</button>
-      <div class="embla" ref="emblaRef">
-        <div class="embla__container">
-          <div class="embla__slide">総人口</div>
-          <div class="embla__slide">年少人口</div>
-          <div class="embla__slide">生産年齢人口</div>
-          <div class="embla__slide">老年人口</div>
-        </div>
+  <div class="chart-container">
+    <client-only>
+      <highcharts :options="chartOptions" ref="chartRef" />
+    </client-only>
+  </div>
+  <div class="wrapper relative">
+    <button @click="emblaApi?.scrollPrev()" :disabled="!canScrollPrev"
+      class="embla__button embla__button--prev">&lt;</button>
+    <button @click="emblaApi?.scrollNext()" :disabled="!canScrollNext"
+      class="embla__button embla__button--next">&gt;</button>
+    <div class="embla" ref="emblaRef">
+      <div class="embla__container">
+        <div class="embla__slide">総人口</div>
+        <div class="embla__slide">年少人口</div>
+        <div class="embla__slide">生産年齢人口</div>
+        <div class="embla__slide">老年人口</div>
       </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -135,7 +166,7 @@ const setSeries = async () => {
 }
 
 @media (max-width: 700px) {
-  
+
   .detail {
     display: none;
   }
