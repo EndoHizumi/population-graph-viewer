@@ -1,44 +1,65 @@
 <script setup lang="ts">
 import { usePrefectureStore } from '~/stores/prefecture'
-import { computed } from 'vue'
-import type { PopulationDataItem, YearlyData } from '~/types/response'
+import { ref, watch, computed } from 'vue';
+const prefectureStore = usePrefectureStore();
 
-const prefectureStore = usePrefectureStore()
+const isLoading = ref(false);
+const yearList = computed(() => prefectureStore.yearList);
+const currentTab = computed(() => prefectureStore.currentTab);
+const selectedPrefectures = computed(() => prefectureStore.selectedPrefectures);
+const populationData = computed(() => prefectureStore.populationData);
+const prefecturesList = computed(() => prefectureStore.prefecturesList);
 
-const currentCategory = computed(() => prefectureStore.currentTab === 0 ? 'total' : 'young')
-const selectedPrefectures = computed(() => prefectureStore.selectedPrefectures)
-const populationData = computed(() => prefectureStore.populationData)
+// 選択された都道府県が変わったら、データを取得する
+watch(selectedPrefectures, async (newVal) => {
+    if (newVal.length > 0) {
+        isLoading.value = true;
+        try {
+            // すべての選択された都道府県のデータを取得
+            await Promise.all(newVal.map(id => prefectureStore.fetchPopulationData(id)));
+        } finally {
+            isLoading.value = false;
+        }
+    }
+}, { deep: true });
 
-const getValue = (id: number, rowIndex: number): number | undefined => {
-  return populationData.value[id]?.[currentCategory.value]?.data?.[rowIndex]?.value
-}
 </script>
 
 <template>
-    <div class="detail flex-1 flex flex-col text-2xl text-gray-400 text-center">
-        <div v-if="prefectureStore.isLoading">
-            データを読み込み中...
-        </div>
-        <span v-else-if="selectedPrefectures.length <= 0">都道府県を選択してください</span>
-        <table v-else class="w-full">
-        <thead>
-            <tr class="border-1">
-            <th class="border-1">年号</th>
-            <th class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
-                {{prefectureStore.prefecturesList?.find(p => p.prefCode === id)?.prefName}}
-            </th>
-            </tr>
-        </thead>
-        <tbody class="text-right">
-            <tr class="border-1" v-for="(year, rowIndex) in prefectureStore.yearList" :key="rowIndex">
-            <td class="border-1">
-                {{ year }}
-            </td>
-            <td class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
-                {{getValue(id, rowIndex)}}
-            </td>
-            </tr>
-        </tbody>
+    <div
+        class="detail flex-1 flex flex-col text-2xl text-gray-400 text-center bg-white rounded-lg shadow-md p-4 overflow-y-scroll">
+        <span v-if="selectedPrefectures.length <= 0">都道府県を選択してください</span>
+        <table v-else class="w-full overflow-y-auto">
+            <thead>
+                <tr class="border-1">
+                    <th class="border-1">年号</th>
+                    <th class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
+                        {{prefecturesList?.find(p => p.prefCode === id)?.prefName}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="text-right">
+                <tr class="border-1" v-for="(year, rowIndex) in yearList" :key="rowIndex">
+                    <td class="border-1">
+                        {{ year }}
+                    </td>
+                    <td class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
+                        <template v-if="populationData[id]">
+                            {{ populationData[id].data[currentTab].data[rowIndex].value }}
+                            ({{ populationData[id].data[currentTab].data[rowIndex].rate || '-' }}%)
+                        </template>
+                        <template v-else>
+                            読み込み中...
+                        </template>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </template>
+
+<style scoped>
+.detail {
+    max-height: calc(100vh - 500px);
+}
+</style>
