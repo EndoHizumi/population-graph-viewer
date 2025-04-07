@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isValid"
+    <div 
         :id="`prefecture-${props.id}`"
         :style="{ backgroundColor: bgColor }"
         class="item w-[67px] h-[67px] bg-gray-200 rounded-xl flex flex-col justify-center items-center select-none cursor-pointer hover:opacity-70"
@@ -11,27 +11,12 @@
         <img :src="prefecturesMap[props.id].icon" :alt="props.name" class="w-[45px] h-[40px]">
         <span>{{ props.name }}</span>
     </div>
-    <div v-else
-        class="item w-[67px] h-[67px] bg-gray-300 rounded-xl flex flex-col justify-center items-center">
-        <span class="text-red-500">エラー</span>
-    </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { inject } from 'vue';
+import { prefecturesMap } from '~/utils/const';
 
-interface Prefecture {
-  icon: string;
-  color: string;
-  name: string;
-}
-
-interface PrefecturesMap {
-  [key: number]: Prefecture;
-}
-
-const prefecturesMap = inject<PrefecturesMap>('prefecturesMap', {});
 const props = defineProps({
     id: { type: Number, required: true },
     name: { type: String, required: true },

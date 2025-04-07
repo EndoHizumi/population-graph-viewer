@@ -134,20 +134,6 @@ describe('PrefSideBar', () => {
         expect(button.attributes('data-name')).toBe(mockPrefecturesList[index].prefName)
       })
     })
-
-    it('1.3 ローディング状態', async () => {
-      wrapper = createComponent({
-        isLoading: true,
-        prefecturesList: [],
-        error: null
-      })
-      store = usePrefectureStore()
-      
-      await nextTick()
-      const loadingText = wrapper.find('[data-testid="loading-message"]')
-      expect(loadingText.exists()).toBe(true)
-      expect(loadingText.text()).toBe('データを読み込み中...')
-    })
   })
 
   describe('2. 都道府県選択機能', () => {

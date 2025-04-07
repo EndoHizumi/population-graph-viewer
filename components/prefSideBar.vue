@@ -26,7 +26,6 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
 <template>
   <div class="side-bar mt-2">
     <div class="side-bar-item-content flex flex-col gap-2 pt-4 justify-center items-center">
-      <div v-if="isLoading" data-testid="loading-message">データを読み込み中...</div>
         <legend-button
           v-for="prefecture in prefecturesList"
           :key="prefecture.prefCode"

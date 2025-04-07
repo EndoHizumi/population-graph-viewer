@@ -76,45 +76,6 @@ describe('LegendButton', () => {
     });
   });
 
-  // Propsバリデーション
-  describe('Propsバリデーション', () => {
-    it('idは必須であること', () => {
-      const wrapper = mount(LegendButton, {
-        props: { name: '東京都' } as any,
-        global: { ...globalMocks }
-      });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-
-    it('nameは必須であること', () => {
-      const wrapper = mount(LegendButton, {
-        props: { id: 13 } as any,
-        global: { ...globalMocks }
-      });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-
-    it('idは数値型であること', () => {
-      const wrapper = mount(LegendButton, {
-        props: { id: '13' as any, name: '東京都' },
-        global: { ...globalMocks }
-      });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-
-    it('nameは文字列型であること', () => {
-      const wrapper = mount(LegendButton, {
-        props: { id: 13, name: 13 as any },
-        global: { ...globalMocks }
-      });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-  });
-
   // イベントテスト
   describe('イベント', () => {
     it('クリック時にclickイベントが発火すること', async () => {
@@ -219,24 +180,4 @@ describe('LegendButton', () => {
     });
   });
 
-  // エッジケーステスト
-  describe('エッジケース', () => {
-    it('存在しない都道府県IDの場合にエラー表示されること', () => {
-      const wrapper = createWrapper({ id: 999 });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-
-    it('都道府県名が空文字の場合にエラー表示されること', () => {
-      const wrapper = createWrapper({ name: '' });
-      expect(wrapper.text()).toContain('エラー');
-      expect(wrapper.classes()).toContain('bg-gray-300');
-    });
-
-    it('正常なpropsの場合は都道府県名が表示されること', () => {
-      const wrapper = createWrapper();
-      expect(wrapper.text()).toBe('東京都');
-      expect(wrapper.classes()).not.toContain('bg-gray-300');
-    });
-  });
 });
