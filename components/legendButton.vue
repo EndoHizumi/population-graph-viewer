@@ -25,15 +25,6 @@ const emit = defineEmits(['click']);
 const bgColor = ref('rgb(229, 231, 235)');
 const isClicked = ref(false);
 
-const isValid = computed(() => {
-    return props.id != null &&
-           props.name != null &&
-           typeof props.id === 'number' &&
-           typeof props.name === 'string' &&
-           props.name !== '' &&
-           prefecturesMap[props.id] != null;
-});
-
 const onClick = () => {
     isClicked.value = !isClicked.value;
     bgColor.value = isClicked.value ? prefecturesMap[props.id].color : 'rgb(229, 231, 235)';
