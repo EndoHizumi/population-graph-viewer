@@ -4,7 +4,8 @@ import { ref, nextTick } from 'vue'
 import PrefChart from '../prefChart.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { usePrefectureStore } from '../../stores/prefecture'
-import type { YearlyData, Prefecture, PopulationDataItem } from '../../types/response'
+import type { YearlyData, Prefecture, PopulationDataItem, PopulationCompositionPerYear } from '../../types/response'
+import { prefecturesMap } from '~/utils/const'
 
 // Highchartsのモック
 vi.mock('highcharts-vue', () => ({
@@ -54,18 +55,24 @@ const mockPopulationDataItem: PopulationDataItem = {
   data: mockYearlyData
 }
 
-const mockPopulationData: {[prefCode: number]: {[key: string]: PopulationDataItem}} = {
+const mockPopulationData: {[prefCode: number]: PopulationCompositionPerYear} = {
   1: {
-    '0': mockPopulationDataItem,
-    '1': mockPopulationDataItem,
-    '2': mockPopulationDataItem,
-    '3': mockPopulationDataItem
+    boundaryYear: 2000,
+    data: [
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem
+    ]
   },
   2: {
-    '0': mockPopulationDataItem,
-    '1': mockPopulationDataItem,
-    '2': mockPopulationDataItem,
-    '3': mockPopulationDataItem
+    boundaryYear: 2000,
+    data: [
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem
+    ]
   }
 }
 
@@ -101,7 +108,7 @@ describe('PrefChart', () => {
         stubs: {
           'client-only': true,
           'highcharts': true
-        }
+        },
       }
     })
 
@@ -109,10 +116,13 @@ describe('PrefChart', () => {
     // ストアのメソッドをモック
     store.fetchPopulationData = vi.fn().mockImplementation(async (prefCode: number) => {
       store.populationData[prefCode] = {
-        '0': mockPopulationDataItem,
-        '1': mockPopulationDataItem,
-        '2': mockPopulationDataItem,
-        '3': mockPopulationDataItem
+        boundaryYear:2000,
+        data:[
+          mockPopulationDataItem,
+          mockPopulationDataItem,
+          mockPopulationDataItem,
+          mockPopulationDataItem
+        ]
       }
     })
   })
@@ -142,15 +152,15 @@ describe('PrefChart', () => {
     it('2.1 都道府県選択時にデータが表示される', async () => {
       const vm = wrapper.vm as any
       await vm.setSeries()
-      expect(vm.chartOptions.series).toHaveLength(1)
+      expect(vm.chartOptions.series).toHaveLength(2)
       expect(vm.chartOptions.series[0].name).toBe('北海道')
     })
 
     it('2.2 グラフが更新される', async () => {
       const vm = wrapper.vm as any
-      store.selectedPrefectures = [1, 2]
+      store.selectedPrefectures = [1,2]
       await vm.setSeries()
-      expect(vm.chartOptions.series).toHaveLength(2)
+      expect(vm.chartOptions.series).toHaveLength(8)
     })
   })
 
