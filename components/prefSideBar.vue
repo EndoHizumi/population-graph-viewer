@@ -1,43 +1,43 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { usePrefectureStore } from '~/stores/prefecture';
 
 const prefectureStore = usePrefectureStore();
-const prefecturesList = computed(() => prefectureStore.prefecturesList);
+const { prefecturesList, isLoading } = storeToRefs(prefectureStore);
 
 const onClick = (event: { id: number, isClicked: boolean }) => {
   const { id, isClicked } = event;
-  if (!isClicked) {
-    const index = prefectureStore.selectedPrefectures.indexOf(id);
-    if (index !== -1) {
-      prefectureStore.selectedPrefectures.splice(index, 1);
+  
+  // 配列を新しい参照に置き換えて更新
+  if (isClicked) {
+    // 選択された場合は追加（重複を防ぐ）
+    if (!prefectureStore.selectedPrefectures.includes(id)) {
+      prefectureStore.selectedPrefectures = [...prefectureStore.selectedPrefectures, id];
     }
   } else {
-    prefectureStore.selectedPrefectures.push(id);
+    // 選択解除の場合は削除
+    prefectureStore.selectedPrefectures = prefectureStore.selectedPrefectures.filter(
+      prefId => prefId !== id
+    );
   }
-}
+};
 </script>
+
 <template>
   <div class="side-bar mt-2">
     <div class="side-bar-item-content flex flex-col gap-2 pt-4 justify-center items-center">
-      <client-only>
-        <legend-button 
-          v-for="prefecture in prefecturesList" 
-          :key="prefecture.prefCode" 
+        <legend-button
+          v-for="prefecture in prefecturesList"
+          :key="prefecture.prefCode"
           :id="prefecture.prefCode"
-          :name="prefecture.prefName" 
-          @click="onClick" 
+          :name="prefecture.prefName"
+          @click="onClick"
         />
-        <template #fallback>
-          <div class="loading-placeholder">データを読み込み中...</div>
-        </template>
-      </client-only>
     </div>
   </div>
 </template>
 
 <style scoped>
-
 .side-bar {
   min-width: 100px;
   max-height: calc(100vh - 40px);
@@ -45,31 +45,23 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
   overflow-y: auto;
   margin-top: 10px;
   margin-right: 10px;
-  
 }
-
 
 /* レスポンシブ対応 */
 @media (max-width: 700px) {
+  .side-bar {
+    width: auto;
+    height: calc(50vh - 20px);
+    margin: 5px 10px 10px 10px;
+    overflow-y: scroll;
+    flex: 1;
+  }
 
-.side-bar {
-  width: auto;
-  /* 幅を自動調整 */
-  height: calc(50vh - 20px);
-  /* 残り半分からマージン分を引く */
-  margin: 5px 10px 10px 10px;
-  overflow-y: scroll;
-  /* スクロール可能に */
-  flex: 1;
-  /* 残りのスペースを占有 */
-}
-
-.side-bar-item-content {
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
-  /* 上から詰めて表示 */
-}
+  .side-bar-item-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+  }
 }
 </style>
