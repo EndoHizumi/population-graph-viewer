@@ -5,7 +5,8 @@ import emblaCarouselVue from 'embla-carousel-vue'
 import type { Chart } from 'highcharts';
 import { onMounted, onBeforeUnmount, ref, reactive, nextTick } from 'vue';
 import type { YearlyData } from '~/types/response';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
+import { prefecturesMap } from '~/utils/const'
 
 const prefectureStore = usePrefectureStore();
 const chartRef = ref<{ chart: Chart }>();
