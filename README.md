@@ -1,75 +1,84 @@
-# Nuxt Minimal Starter
+# 都道府県人口グラフビューワー
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+都道府県ごとの人口推移データをグラフやテーブルで可視化するWebアプリケーションです。
 
-## Setup
+## 機能
 
-Make sure to install dependencies:
+- 都道府県の選択（単一/複数）
+- 人口推移のグラフ表示
+- データのテーブル表示
+- レスポンシブ対応（デスクトップ/モバイル）
+- エラーハンドリング
+
+## 技術スタック
+
+- [Nuxt.js](https://nuxt.com/) 3.16.1 - Vue.jsフレームワーク
+- [Vue.js](https://vuejs.org/) 3.5.13 - UIフレームワーク
+- [Pinia](https://pinia.vuejs.org/) - 状態管理
+- [Highcharts](https://www.highcharts.com/) - グラフ表示
+- [TailwindCSS](https://tailwindcss.com/) - スタイリング
+
+## 必要要件
+
+- Node.js 18以上
+- pnpm 10以上
+
+## セットアップ
 
 ```bash
-# npm
-npm install
-
-# pnpm
+# 依存関係のインストール
 pnpm install
 
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
+# 開発サーバーの起動（localhost:3000）
 pnpm dev
 
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
+# プロダクションビルド
 pnpm build
 
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+## 環境変数
+
+`.env.example`を`.env`にコピーして、必要な環境変数を設定してください。
+
+## テスト
 
 ```bash
-# npm
-npm run preview
+# ユニットテストの実行
+pnpm test
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+# カバレッジレポートの生成
+pnpm test:coverage
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## プロジェクト構造
+
+```
+├── assets/          # 静的アセット（CSS、画像）
+├── components/      # Vueコンポーネント
+├── pages/          # ページコンポーネント
+├── plugins/        # Nuxtプラグイン
+├── server/         # サーバーサイドコード
+├── stores/         # Piniaストア
+├── types/          # TypeScript型定義
+└── utils/          # ユーティリティ関数
+```
+
+## 主要コンポーネント
+
+- `appHeader.vue` - アプリケーションヘッダー
+- `prefChart.vue` - 人口推移グラフ
+- `prefTable.vue` - データテーブル
+- `prefSideBar.vue` - 都道府県選択サイドバー
+- `legendButton.vue` - グラフ凡例ボタン
+
+## テスト構成
+
+- Vitest - ユニットテスト
+- Playwright - E2Eテスト
+  - 初期表示テスト
+  - 都道府県選択テスト
+  - データ表示テスト
+  - レスポンシブ対応テスト
+  - エラーハンドリングテスト
+  - パフォーマンステスト
