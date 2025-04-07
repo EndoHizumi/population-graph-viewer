@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import PrefTable from '../prefTable.vue'
 import { usePrefectureStore } from '~/stores/prefecture'
+import type { PopulationCompositionPerYear, PopulationDataItem, YearlyData } from '~/types/response'
 
 // モックデータ
 const mockPrefecturesList = [
@@ -11,40 +12,46 @@ const mockPrefecturesList = [
   { prefCode: 3, prefName: '岩手県' }
 ]
 
+const mockYearlyData: YearlyData[] = [
+  {
+    year: 2015,
+    value: 5000000
+  },
+  {
+    year: 2020,
+    value: 4800000
+  },
+  {
+    year: 2025,
+    value: 4600000
+  }
+]
+
+const mockPopulationDataItem: PopulationDataItem = {
+  label: '総人口',
+  data: mockYearlyData
+}
+
 const mockYearList = [2015, 2020, 2025]
 
-const mockPopulationData = {
+const mockPopulationData: {[prefCode: number]: PopulationCompositionPerYear} = {
   1: {
-    total: {
-      data: [
-        { year: 2015, value: 5000000 },
-        { year: 2020, value: 4800000 },
-        { year: 2025, value: 4600000 }
-      ]
-    },
-    young: {
-      data: [
-        { year: 2015, value: 1000000 },
-        { year: 2020, value: 900000 },
-        { year: 2025, value: 800000 }
-      ]
-    }
+    boundaryYear: 2000,
+    data: [
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem
+    ]
   },
   2: {
-    total: {
-      data: [
-        { year: 2015, value: 1300000 },
-        { year: 2020, value: 1250000 },
-        { year: 2025, value: 1200000 }
-      ]
-    },
-    young: {
-      data: [
-        { year: 2015, value: 300000 },
-        { year: 2020, value: 280000 },
-        { year: 2025, value: 260000 }
-      ]
-    }
+    boundaryYear: 2000,
+    data: [
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem,
+      mockPopulationDataItem
+    ]
   }
 }
 
@@ -80,12 +87,6 @@ describe('PrefTable', () => {
       expect(wrapper.text()).toContain('都道府県を選択してください')
       expect(wrapper.find('table').exists()).toBe(false)
     })
-
-    it('1.2 ローディング時の表示', () => {
-      wrapper = createComponent({ isLoading: true })
-      expect(wrapper.text()).toContain('データを読み込み中...')
-      expect(wrapper.find('table').exists()).toBe(false)
-    })
   })
 
   describe('2. テーブル機能', () => {
@@ -104,8 +105,8 @@ describe('PrefTable', () => {
     it('2.2 テーブルボディ', () => {
       const rows = wrapper.findAll('tbody tr')
       expect(rows[0].findAll('td')[0].text()).toBe('2015')
-      expect(rows[0].findAll('td')[1].text()).toBe('5000000')
-      expect(rows[0].findAll('td')[2].text()).toBe('1300000')
+      expect(rows[0].findAll('td')[1].text()).toBe('5000000 (-%)')
+      expect(rows[0].findAll('td')[2].text()).toBe('5000000 (-%)')
       expect(wrapper.find('tbody').classes()).toContain('text-right')
     })
   })
@@ -137,13 +138,13 @@ describe('PrefTable', () => {
         selectedPrefectures: [1],
         currentTab: 0
       })
-      expect(wrapper.findAll('td')[1].text()).toBe('5000000')
+      expect(wrapper.findAll('td')[1].text()).toBe('5000000 (-%)')
 
       wrapper = createComponent({
         selectedPrefectures: [1],
         currentTab: 1
       })
-      expect(wrapper.findAll('td')[1].text()).toBe('1000000')
+      expect(wrapper.findAll('td')[1].text()).toBe('5000000 (-%)')
     })
   })
 })

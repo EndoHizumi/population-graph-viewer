@@ -44,13 +44,8 @@ watch(selectedPrefectures, async (newVal) => {
                         {{ year }}
                     </td>
                     <td class="border-1" v-for="(id, index) in selectedPrefectures" :key="index">
-                        <template v-if="populationData[id]">
-                            {{ populationData[id].data[currentTab].data[rowIndex].value }}
-                            ({{ populationData[id].data[currentTab].data[rowIndex].rate || '-' }}%)
-                        </template>
-                        <template v-else>
-                            読み込み中...
-                        </template>
+                        {{ populationData[id].data[currentTab].data[rowIndex].value }}
+                        ({{ populationData[id].data[currentTab].data[rowIndex].rate || '-' }}%)
                     </td>
                 </tr>
             </tbody>
