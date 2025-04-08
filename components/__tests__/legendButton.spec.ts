@@ -4,19 +4,21 @@ import LegendButton from '../legendButton.vue'
 
 // 型定義
 interface Prefecture {
-  icon: string;
-  color: string;
-  name: string;
+  icon: string
+  color: string
+  name: string
 }
 
 interface PrefecturesMap {
-  [key: number]: Prefecture;
+  [key: number]: Prefecture
 }
 
 interface ClickEvent {
-  id: number;
-  isClicked: boolean;
+  id: number
+  isClicked: boolean
 }
+
+type ClickEmitted = Array<[ClickEvent]>
 
 // モックデータ
 const mockPrefecturesMap: PrefecturesMap = {
@@ -40,7 +42,6 @@ const globalMocks = {
   }
 }
 
-// テストヘルパー
 const createWrapper = (props = {}) => {
   return mount(LegendButton, {
     props: {
@@ -86,9 +87,9 @@ describe('LegendButton', () => {
     it('クリックイベントのペイロードが正しいこと', async () => {
       const wrapper = createWrapper()
       await wrapper.trigger('click')
-      const emitted = wrapper.emitted('click')
+      const emitted = wrapper.emitted('click') as ClickEmitted
       expect(emitted).toBeTruthy()
-      expect(emitted![0][0]).toEqual({ id: 13, isClicked: true })
+      expect(emitted[0][0]).toEqual({ id: 13, isClicked: true })
     })
 
     it('複数回クリックで状態が正しく切り替わること', async () => {
@@ -165,17 +166,17 @@ describe('LegendButton', () => {
     it('キーボード操作（Enter）でクリックイベントが発火すること', async () => {
       const wrapper = createWrapper()
       await wrapper.trigger('keydown.enter')
-      const emitted = wrapper.emitted('click')
+      const emitted = wrapper.emitted('click') as ClickEmitted
       expect(emitted).toBeTruthy()
-      expect((emitted![0][0] as ClickEvent).isClicked).toBe(true)
+      expect(emitted[0][0].isClicked).toBe(true)
     })
 
     it('キーボード操作（Space）でクリックイベントが発火すること', async () => {
       const wrapper = createWrapper()
       await wrapper.trigger('keydown.space')
-      const emitted = wrapper.emitted('click')
+      const emitted = wrapper.emitted('click') as ClickEmitted
       expect(emitted).toBeTruthy()
-      expect((emitted![0][0] as ClickEvent).isClicked).toBe(true)
+      expect(emitted[0][0].isClicked).toBe(true)
     })
   })
 

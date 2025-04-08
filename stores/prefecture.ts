@@ -10,6 +10,11 @@ export const usePrefectureStore = defineStore('prefecture', () => {
   const currentTab = ref(0)
   const yearList = ref<string[]>([])
 
+  /**
+   * 都道府県一覧を取得する
+   * @returns {Promise<Prefecture[]>} 都道府県一覧
+   * @throws {Error} ネットワークエラー時
+   */
   const fetchPopulationData = async (prefCode: number) => {
     if (populationData.value[prefCode]) {
       return
@@ -36,6 +41,11 @@ export const usePrefectureStore = defineStore('prefecture', () => {
     }
   }
 
+  /**
+   * 都道府県一覧を取得する
+   * @returns {Promise<Prefecture[]>} 都道府県一覧
+   * @throws {Error} ネットワークエラー時
+   */
   const fetchPrefectures = async () => {
     if (prefecturesList.value?.length > 0) return prefecturesList.value
 

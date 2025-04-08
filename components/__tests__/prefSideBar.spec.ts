@@ -5,6 +5,8 @@ import { nextTick, ref } from 'vue'
 import PrefSideBar from '../prefSideBar.vue'
 import { usePrefectureStore } from '~/stores/prefecture'
 
+import type { VueWrapper } from '@vue/test-utils'
+
 // prefecturesMapのモックを作成
 vi.mock('~/utils/const', () => ({
   prefecturesMap: {
@@ -35,14 +37,14 @@ vi.mock('../legendButton.vue', () => ({
 }))
 
 // モックデータ
-const mockPrefecturesList = [
+const prefecturesList = [
   { prefCode: 1, prefName: '北海道' },
   { prefCode: 2, prefName: '青森県' },
   { prefCode: 3, prefName: '岩手県' }
 ]
 
 describe('PrefSideBar', () => {
-  let wrapper: any
+  let wrapper: VueWrapper
   let store: ReturnType<typeof usePrefectureStore>
 
   const createComponent = (initialState = {}) => {
@@ -54,7 +56,7 @@ describe('PrefSideBar', () => {
             initialState: {
               prefecture: {
                 selectedPrefectures: [],
-                prefecturesList: mockPrefecturesList,
+                prefecturesList: prefecturesList,
                 isLoading: false,
                 error: null,
                 ...initialState
@@ -91,7 +93,7 @@ describe('PrefSideBar', () => {
               // 初期状態を設定（選択済みの都道府県はtrueに）
               const store = usePrefectureStore()
               const isClicked = ref(store.selectedPrefectures.includes(props.id))
-
+              
               const handleClick = () => {
                 // isClickedの値を反転
                 isClicked.value = !isClicked.value
@@ -135,11 +137,11 @@ describe('PrefSideBar', () => {
     it('1.2 都道府県リストの表示', () => {
       wrapper = createComponent()
       const buttons = wrapper.findAll('button')
-      expect(buttons).toHaveLength(mockPrefecturesList.length)
+      expect(buttons).toHaveLength(prefecturesList.length)
 
-      buttons.forEach((button: any, index: number) => {
-        expect(button.attributes('data-id')).toBe(mockPrefecturesList[index].prefCode.toString())
-        expect(button.attributes('data-name')).toBe(mockPrefecturesList[index].prefName)
+      buttons.forEach((button, index) => {
+        expect(button.attributes('data-id')).toBe(prefecturesList[index].prefCode.toString())
+        expect(button.attributes('data-name')).toBe(prefecturesList[index].prefName)
       })
     })
   })
@@ -167,8 +169,10 @@ describe('PrefSideBar', () => {
 
       // モックのisClickedを初期状態でtrueに設定
       const button = wrapper.findAll('button').at(0)
-      await button.trigger('click') // isClicked: false に変更されて解除イベントが発火
-      await nextTick()
+      if (button) {
+        await button.trigger('click') // isClicked: false に変更されて解除イベントが発火
+        await nextTick()
+      }
 
       // 選択が解除されていることを確認
       expect(store.selectedPrefectures).not.toContain(1)
@@ -176,10 +180,12 @@ describe('PrefSideBar', () => {
 
     it('2.3 複数選択', async () => {
       const buttons = wrapper.findAll('button')
-
-      await buttons[0].trigger('click')
-      await nextTick()
-      await buttons[1].trigger('click')
+if (buttons[0] && buttons[1]) {
+  await buttons[0].trigger('click')
+  await nextTick()
+  await buttons[1].trigger('click')
+  await nextTick()
+}
       await nextTick()
 
       expect(store.selectedPrefectures).toEqual([1, 2])
@@ -195,13 +201,15 @@ describe('PrefSideBar', () => {
       const buttons = wrapper.findAll('button')
 
       // モックのisClickedを初期状態でtrueに設定し、クリックで解除
-      await buttons[0].trigger('click') // isClicked: false に変更
-      await nextTick()
-      expect(store.selectedPrefectures).toEqual([2])
+      if (buttons[0] && buttons[1]) {
+        await buttons[0].trigger('click') // isClicked: false に変更
+        await nextTick()
+        expect(store.selectedPrefectures).toEqual([2])
 
-      await buttons[1].trigger('click') // isClicked: false に変更
-      await nextTick()
-      expect(store.selectedPrefectures).toEqual([])
+        await buttons[1].trigger('click') // isClicked: false に変更
+        await nextTick()
+        expect(store.selectedPrefectures).toEqual([])
+      }
     })
 
     it('2.5 エラー処理 - 重複選択の防止', async () => {
@@ -237,7 +245,7 @@ describe('PrefSideBar', () => {
 
       // コンテンツの存在確認
       expect(content.exists()).toBe(true)
-      expect(wrapper.findAll('button')).toHaveLength(mockPrefecturesList.length)
+      expect(wrapper.findAll('button')).toHaveLength(prefecturesList.length)
     })
 
     it('3.2 モバイル表示の構造確認', async () => {
@@ -255,10 +263,10 @@ describe('PrefSideBar', () => {
 
       // 子要素の確認
       const buttons = wrapper.findAll('button')
-      expect(buttons.length).toBe(mockPrefecturesList.length)
-      buttons.forEach((button: any, index: number) => {
+      expect(buttons.length).toBe(prefecturesList.length)
+      buttons.forEach((button, index) => {
         expect(button.exists()).toBe(true)
-        expect(button.attributes('data-id')).toBe(mockPrefecturesList[index].prefCode.toString())
+        expect(button.attributes('data-id')).toBe(prefecturesList[index].prefCode.toString())
       })
     })
 
@@ -274,7 +282,7 @@ describe('PrefSideBar', () => {
 
       // ボタンの存在確認とスクロール必要性の確認
       const buttons = wrapper.findAll('button')
-      expect(buttons.length).toBe(mockPrefecturesList.length)
+      expect(buttons.length).toBe(prefecturesList.length)
       expect(buttons.length).toBeGreaterThan(0)
     })
   })

@@ -110,7 +110,7 @@ const setSeries = async () => {
 
       chartOptions.series.push(
         {
-          id,
+          id: String(id),
           type: 'line',
           showInLegend: false,
           name: dataName,

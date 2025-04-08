@@ -7,13 +7,20 @@ import { createTestingPinia } from '@pinia/testing'
 import { usePrefectureStore } from '../../stores/prefecture'
 import type { YearlyData, Prefecture, PopulationDataItem, PopulationCompositionPerYear } from '../../types/response'
 
+interface ChartSeries {
+  id: number
+  name: string
+  type: string
+  data: Array<{ x: number; y: number }>
+}
+
 interface PrefChartMock extends ComponentPublicInstance {
-  chartOptions: { series: Array<{ id: number; name: string; type: string; data: any[] }> };
-  setSeries: () => Promise<void>;
-  changePage: (api: typeof mockEmblaApi) => Promise<void>;
-  updateButtons: () => Promise<void>;
-  canScrollPrev: boolean;
-  canScrollNext: boolean;
+  chartOptions: { series: ChartSeries[] }
+  setSeries: () => Promise<void>
+  changePage: (api: typeof mockEmblaApi) => Promise<void>
+  updateButtons: () => Promise<void>
+  canScrollPrev: boolean
+  canScrollNext: boolean
 }
 
 // Highchartsのモック
@@ -48,7 +55,7 @@ vi.mock('embla-carousel-vue', () => ({
 }))
 
 // テストデータ
-const mockYearlyData: YearlyData[] = [
+const yearlyDataList: YearlyData[] = [
   {
     year: 2015,
     value: 5000000
@@ -59,33 +66,33 @@ const mockYearlyData: YearlyData[] = [
   }
 ]
 
-const mockPopulationDataItem: PopulationDataItem = {
+const populationDataItem: PopulationDataItem = {
   label: '総人口',
-  data: mockYearlyData
+  data: yearlyDataList
 }
 
-const mockPopulationData: { [prefCode: number]: PopulationCompositionPerYear } = {
+const populationData: { [prefCode: number]: PopulationCompositionPerYear } = {
   1: {
     boundaryYear: 2000,
     data: [
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem
+      populationDataItem,
+      populationDataItem,
+      populationDataItem,
+      populationDataItem
     ]
   },
   2: {
     boundaryYear: 2000,
     data: [
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem
+      populationDataItem,
+      populationDataItem,
+      populationDataItem,
+      populationDataItem
     ]
   }
 }
 
-const mockPrefecturesList: Prefecture[] = [
+const prefecturesList: Prefecture[] = [
   { prefCode: 1, prefName: '北海道' },
   { prefCode: 2, prefName: '青森県' }
 ]
@@ -101,8 +108,8 @@ describe('PrefChart', () => {
       initialState: {
         prefecture: {
           selectedPrefectures: [1],
-          prefecturesList: mockPrefecturesList,
-          populationData: mockPopulationData,
+          prefecturesList: prefecturesList,
+          populationData: populationData,
           isLoading: false,
           currentPage: 0
         }
@@ -127,10 +134,10 @@ describe('PrefChart', () => {
       store.populationData[prefCode] = {
         boundaryYear: 2000,
         data: [
-          mockPopulationDataItem,
-          mockPopulationDataItem,
-          mockPopulationDataItem,
-          mockPopulationDataItem
+          populationDataItem,
+          populationDataItem,
+          populationDataItem,
+          populationDataItem
         ]
       }
     })
@@ -175,12 +182,12 @@ describe('PrefChart', () => {
 
   describe('3. カルーセル機能', () => {
     it('3.1 すべてのスライドが正しく表示される', () => {
-      const slides = wrapper.findAll('.embla__slide')
-      expect(slides).toHaveLength(4)
-      expect(slides[0].text()).toBe('総人口')
-      expect(slides[1].text()).toBe('年少人口')
-      expect(slides[2].text()).toBe('生産年齢人口')
-      expect(slides[3].text()).toBe('老年人口')
+      const slideList = wrapper.findAll('.embla__slide')
+      expect(slideList).toHaveLength(4)
+      expect(slideList[0].text()).toBe('総人口')
+      expect(slideList[1].text()).toBe('年少人口')
+      expect(slideList[2].text()).toBe('生産年齢人口')
+      expect(slideList[3].text()).toBe('老年人口')
     })
 
     it('3.2 ナビゲーションボタンの状態が正しく管理される', async () => {
@@ -216,7 +223,7 @@ describe('PrefChart', () => {
 
       // 初期データを設定
       store.selectedPrefectures = [1]
-      store.populationData = mockPopulationData
+      store.populationData = populationData
 
       // スライド切り替えを実行
       await vm.changePage(mockEmblaApi)
