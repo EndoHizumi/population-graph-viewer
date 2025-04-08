@@ -1,10 +1,24 @@
-import antfu from '@antfu/eslint-config'
+// @ts-check
+import withNuxt from './.nuxt/eslint.config.mjs'
+import stylistic from '@stylistic/eslint-plugin'
 
-export default antfu({
-  typescript: true,
-  vue: true,
-  rules: {
-    'ts/consistent-type-imports': 'off',
-    'ts/no-namespace': 'off'
+export default withNuxt(
+  // Your custom configs here
+  {
+    files: ['**/*.vue', '**/*.ts'],
+    rules: {
+      'no-console': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  {
+    plugins: {
+      stylistic
+    },
+    rules: {
+      'stylistic/semi': ['error', 'never'],
+      'stylistic/max-len': ['error', { 'code': 120 }],
+      'stylistic/quotes': ['error', 'single']
+    }
   }
-})
+)

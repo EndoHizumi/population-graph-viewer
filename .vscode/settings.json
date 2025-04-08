@@ -1,8 +1,13 @@
 {
     "cSpell.words": [
+        "domcontentloaded",
         "Embla",
         "highcharts",
         "nuxt",
         "RESAS"
-    ]
+    ],
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
 }
