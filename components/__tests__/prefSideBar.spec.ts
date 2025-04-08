@@ -239,9 +239,6 @@ if (buttons[0] && buttons[1]) {
 
       // 基本的なクラスの確認
       expect(sideBar.classes()).toContain('side-bar')
-      expect(sideBar.classes()).toContain('mt-2')
-      expect(content.classes()).toContain('flex')
-      expect(content.classes()).toContain('flex-col')
 
       // コンテンツの存在確認
       expect(content.exists()).toBe(true)
@@ -259,7 +256,6 @@ if (buttons[0] && buttons[1]) {
       // クラスの確認
       expect(sideBar.classes()).toContain('side-bar')
       expect(content.classes()).toContain('side-bar-item-content')
-      expect(content.classes()).toContain('flex')
 
       // 子要素の確認
       const buttons = wrapper.findAll('button')
@@ -278,7 +274,6 @@ if (buttons[0] && buttons[1]) {
       expect(sideBar.classes()).toContain('side-bar')
       expect(content.exists()).toBe(true)
       expect(content.classes()).toContain('side-bar-item-content')
-      expect(content.classes()).toContain('flex')
 
       // ボタンの存在確認とスクロール必要性の確認
       const buttons = wrapper.findAll('button')

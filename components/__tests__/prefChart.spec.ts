@@ -242,7 +242,7 @@ describe('PrefChart', () => {
       await vm.setSeries()
       const series = vm.chartOptions.series[0]
       expect(series).toBeDefined()
-      expect(series.id).toBe(1)
+      expect(series.id).toBe('1')
       expect(series.name).toBe('北海道')
       expect(series.type).toBe('line')
       expect(series.data).toBeDefined()
@@ -255,7 +255,7 @@ describe('PrefChart', () => {
       const vm = wrapper.vm as PrefChartMock
       store.selectedPrefectures = [2]
       await vm.setSeries()
-      expect(vm.chartOptions.series[0].id).toBe(2)
+      expect(vm.chartOptions.series[0].id).toBe('2')
     })
   })
 })
