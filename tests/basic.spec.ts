@@ -46,7 +46,7 @@ test.describe('基本機能テスト', () => {
 
     // 大阪府を追加選択
     await page.locator('[id^="prefecture-"]').filter({ hasText: '大阪府' }).click({ force: true })
-    // グラフに両都府のデータが表示されることを確認
+    // グラフに両都道府県のデータが表示されることを確認
     await expect(page.locator('.chart')).toContainText('東京都')
     await expect(page.locator('.chart')).toContainText('大阪府')
   })
