@@ -26,10 +26,7 @@ watch(selectedPrefectures, async (newVal) => {
 </script>
 
 <template>
-    <div
-        class="detail flex-1 flex flex-col text-2xl text-gray-400 
-               text-center bg-white rounded-lg shadow-md p-4 
-               overflow-y-scroll">
+    <div class="detail">
         <span v-if="selectedPrefectures.length <= 0">都道府県を選択してください</span>
         <table v-else class="w-full overflow-y-auto">
             <thead>
@@ -57,6 +54,24 @@ watch(selectedPrefectures, async (newVal) => {
 
 <style scoped>
 .detail {
-    max-height: calc(100vh - 500px);
+    max-height: calc(100vh - 475px);
+    flex: 1 1 0%;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    color: rgb(156, 163, 175);
+    text-align: center;
+    background-color: rgb(255, 255, 255);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+    overflow-y: scroll;
+}
+
+@media (max-width: 700px) {
+    .detail {
+        display: none;
+    }
 }
 </style>

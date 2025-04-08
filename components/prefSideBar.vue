@@ -25,7 +25,7 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
 
 <template>
   <div class="side-bar mt-2">
-    <div class="side-bar-item-content flex flex-col gap-2 pt-4 justify-center items-center">
+    <div class="side-bar-item-content">
         <legend-button
           v-for="prefecture in prefecturesList"
           :id="prefecture.prefCode"
@@ -47,7 +47,15 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
   margin-right: 10px;
 }
 
-/* レスポンシブ対応 */
+.side-bar-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
 @media (max-width: 700px) {
   .side-bar {
     width: auto;

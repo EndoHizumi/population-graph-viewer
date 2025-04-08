@@ -165,21 +165,6 @@ const setSeries = async () => {
   overflow: hidden;
 }
 
-.detail {
-  background-color: white;
-  max-height: calc(100vh - 500px);
-  border-radius: 8px;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-@media (max-width: 700px) {
-
-  .detail {
-    display: none;
-  }
-}
-
 .embla {
   overflow: hidden;
 }
