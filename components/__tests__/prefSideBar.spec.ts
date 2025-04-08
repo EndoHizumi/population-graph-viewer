@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { nextTick, ref } from 'vue'
-import PrefSideBar from '../prefSideBar.vue' 
+import PrefSideBar from '../prefSideBar.vue'
 import { usePrefectureStore } from '~/stores/prefecture'
 
 // prefecturesMapのモックを作成
@@ -12,7 +12,7 @@ vi.mock('~/utils/const', () => ({
     2: { color: '#00FF00', icon: '/icons/aomori.svg' },
     3: { color: '#0000FF', icon: '/icons/iwate.svg' }
   }
-}));
+}))
 
 // 他のコンポーネントをモック化
 vi.mock('../legendButton.vue', () => ({
@@ -22,9 +22,17 @@ vi.mock('../legendButton.vue', () => ({
       id: Number,
       name: String
     },
-    template: '<button :data-id="id" :data-name="name" @click="$emit(\'click\', {id, isClicked: true})">{{ name }}</button>'
+    template: `
+      <button 
+        :data-id="id" 
+        :data-name="name" 
+        @click="$emit('click', { id, isClicked: true })"
+      >
+        {{ name }}
+      </button>
+    `
   }
-}));
+}))
 
 // モックデータ
 const mockPrefecturesList = [
@@ -35,7 +43,7 @@ const mockPrefecturesList = [
 
 describe('PrefSideBar', () => {
   let wrapper: any
-  let store: any
+  let store: ReturnType<typeof usePrefectureStore>
 
   const createComponent = (initialState = {}) => {
     return mount(PrefSideBar, {
@@ -81,19 +89,19 @@ describe('PrefSideBar', () => {
             },
             setup(props, { emit }) {
               // 初期状態を設定（選択済みの都道府県はtrueに）
-              const store = usePrefectureStore();
-              const isClicked = ref(store.selectedPrefectures.includes(props.id));
-              
+              const store = usePrefectureStore()
+              const isClicked = ref(store.selectedPrefectures.includes(props.id))
+
               const handleClick = () => {
                 // isClickedの値を反転
-                isClicked.value = !isClicked.value;
+                isClicked.value = !isClicked.value
                 // 新しい状態でイベントを発火
                 emit('click', {
                   id: props.id,
                   isClicked: isClicked.value
-                });
-              };
-              
+                })
+              }
+
               return {
                 isClicked,
                 handleClick
@@ -102,15 +110,15 @@ describe('PrefSideBar', () => {
           }
         }
       }
-    });
-  };
+    })
+  }
 
   beforeEach(() => {
-    document.body.innerHTML = '';
-    const div = document.createElement('div');
-    div.id = 'app';
-    document.body.appendChild(div);
-  });
+    document.body.innerHTML = ''
+    const div = document.createElement('div')
+    div.id = 'app'
+    document.body.appendChild(div)
+  })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -128,7 +136,7 @@ describe('PrefSideBar', () => {
       wrapper = createComponent()
       const buttons = wrapper.findAll('button')
       expect(buttons).toHaveLength(mockPrefecturesList.length)
-      
+
       buttons.forEach((button: any, index: number) => {
         expect(button.attributes('data-id')).toBe(mockPrefecturesList[index].prefCode.toString())
         expect(button.attributes('data-name')).toBe(mockPrefecturesList[index].prefName)
@@ -146,7 +154,7 @@ describe('PrefSideBar', () => {
       const button = wrapper.findAll('button').at(0)
       await button?.trigger('click')
       await nextTick()
-      
+
       expect(store.selectedPrefectures).toContain(1)
     })
 
@@ -161,19 +169,19 @@ describe('PrefSideBar', () => {
       const button = wrapper.findAll('button').at(0)
       await button.trigger('click') // isClicked: false に変更されて解除イベントが発火
       await nextTick()
-      
+
       // 選択が解除されていることを確認
       expect(store.selectedPrefectures).not.toContain(1)
     })
 
     it('2.3 複数選択', async () => {
       const buttons = wrapper.findAll('button')
-      
+
       await buttons[0].trigger('click')
       await nextTick()
       await buttons[1].trigger('click')
       await nextTick()
-      
+
       expect(store.selectedPrefectures).toEqual([1, 2])
     })
 
@@ -185,7 +193,7 @@ describe('PrefSideBar', () => {
       store = usePrefectureStore()
 
       const buttons = wrapper.findAll('button')
-      
+
       // モックのisClickedを初期状態でtrueに設定し、クリックで解除
       await buttons[0].trigger('click') // isClicked: false に変更
       await nextTick()
@@ -198,7 +206,7 @@ describe('PrefSideBar', () => {
 
     it('2.5 エラー処理 - 重複選択の防止', async () => {
       const button = wrapper.findAll('button').at(0)
-      
+
       // 1回目の選択
       await button?.trigger('click')
       await nextTick()
@@ -257,17 +265,17 @@ describe('PrefSideBar', () => {
     it('3.3 スクロール機能の確認', async () => {
       const sideBar = wrapper.find('.side-bar')
       const content = wrapper.find('.side-bar-item-content')
-      
+
       // スクロール用のクラスと構造の確認
       expect(sideBar.classes()).toContain('side-bar')
       expect(content.exists()).toBe(true)
       expect(content.classes()).toContain('side-bar-item-content')
       expect(content.classes()).toContain('flex')
-      
+
       // ボタンの存在確認とスクロール必要性の確認
       const buttons = wrapper.findAll('button')
       expect(buttons.length).toBe(mockPrefecturesList.length)
       expect(buttons.length).toBeGreaterThan(0)
     })
   })
-});
+})

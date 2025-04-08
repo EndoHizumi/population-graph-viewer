@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import PrefTable from '../prefTable.vue'
-import { usePrefectureStore } from '~/stores/prefecture'
 import type { PopulationCompositionPerYear, PopulationDataItem, YearlyData } from '~/types/response'
 
 // モックデータ
@@ -56,7 +55,7 @@ const mockPopulationData: {[prefCode: number]: PopulationCompositionPerYear} = {
 }
 
 describe('PrefTable', () => {
-  let wrapper: any
+  let wrapper: ReturnType<typeof mount>
 
   const createComponent = (initialState = {}) => {
     return mount(PrefTable, {

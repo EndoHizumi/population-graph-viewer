@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount, VueWrapper } from '@vue/test-utils'
-import { ref, nextTick } from 'vue'
+import type { VueWrapper } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
+import { ref, nextTick, type ComponentPublicInstance } from 'vue'
 import PrefChart from '../prefChart.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { usePrefectureStore } from '../../stores/prefecture'
 import type { YearlyData, Prefecture, PopulationDataItem, PopulationCompositionPerYear } from '../../types/response'
-import { prefecturesMap } from '~/utils/const'
+
+interface PrefChartMock extends ComponentPublicInstance {
+  chartOptions: { series: Array<{ id: number; name: string; type: string; data: any[] }> };
+  setSeries: () => Promise<void>;
+  changePage: (api: typeof mockEmblaApi) => Promise<void>;
+  updateButtons: () => Promise<void>;
+  canScrollPrev: boolean;
+  canScrollNext: boolean;
+}
 
 // Highchartsのモック
 vi.mock('highcharts-vue', () => ({
@@ -55,7 +64,7 @@ const mockPopulationDataItem: PopulationDataItem = {
   data: mockYearlyData
 }
 
-const mockPopulationData: {[prefCode: number]: PopulationCompositionPerYear} = {
+const mockPopulationData: { [prefCode: number]: PopulationCompositionPerYear } = {
   1: {
     boundaryYear: 2000,
     data: [
@@ -116,8 +125,8 @@ describe('PrefChart', () => {
     // ストアのメソッドをモック
     store.fetchPopulationData = vi.fn().mockImplementation(async (prefCode: number) => {
       store.populationData[prefCode] = {
-        boundaryYear:2000,
-        data:[
+        boundaryYear: 2000,
+        data: [
           mockPopulationDataItem,
           mockPopulationDataItem,
           mockPopulationDataItem,
@@ -141,7 +150,7 @@ describe('PrefChart', () => {
     })
 
     it('1.2 初期状態が正しく設定される', () => {
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as PrefChartMock
       expect(vm.chartOptions.series).toHaveLength(0)
       expect(wrapper.find('.embla__slide').text()).toBe('総人口')
       expect(wrapper.find('.embla__button--prev').attributes('disabled')).toBeDefined()
@@ -150,15 +159,15 @@ describe('PrefChart', () => {
 
   describe('2. グラフ機能', () => {
     it('2.1 都道府県選択時にデータが表示される', async () => {
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as PrefChartMock
       await vm.setSeries()
       expect(vm.chartOptions.series).toHaveLength(2)
       expect(vm.chartOptions.series[0].name).toBe('北海道')
     })
 
     it('2.2 グラフが更新される', async () => {
-      const vm = wrapper.vm as any
-      store.selectedPrefectures = [1,2]
+      const vm = wrapper.vm as PrefChartMock
+      store.selectedPrefectures = [1, 2]
       await vm.setSeries()
       expect(vm.chartOptions.series).toHaveLength(8)
     })
@@ -175,8 +184,8 @@ describe('PrefChart', () => {
     })
 
     it('3.2 ナビゲーションボタンの状態が正しく管理される', async () => {
-      const vm = wrapper.vm as any
-      
+      const vm = wrapper.vm as PrefChartMock
+
       // 初期状態
       expect(vm.canScrollPrev).toBe(false)
       expect(vm.canScrollNext).toBe(true)
@@ -196,32 +205,32 @@ describe('PrefChart', () => {
     })
 
     it('3.3 スライド切り替え時にストアが更新される', async () => {
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as PrefChartMock
       await vm.changePage(mockEmblaApi)
       expect(store.currentTab).toBe(1)
       expect(mockEmblaApi.selectedScrollSnap).toHaveBeenCalled()
     })
 
     it('3.4 スライド切り替え時にデータが更新される', async () => {
-      const vm = wrapper.vm as any
-      
+      const vm = wrapper.vm as PrefChartMock
+
       // 初期データを設定
       store.selectedPrefectures = [1]
       store.populationData = mockPopulationData
-      
+
       // スライド切り替えを実行
       await vm.changePage(mockEmblaApi)
-      
+
       // 非同期処理の完了を待つ
       await nextTick()
-      
+
       // 検証
       expect(store.currentTab).toBe(1)
-      
+
       // setSeriesの効果を検証
       expect(vm.chartOptions.series).toBeDefined()
       expect(Array.isArray(vm.chartOptions.series)).toBe(true)
-      
+
       // データが正しく更新されているか確認
       await vm.setSeries()
       const series = vm.chartOptions.series[0]
@@ -236,7 +245,7 @@ describe('PrefChart', () => {
 
   describe('4. データ管理', () => {
     it('4.1 データ更新が正しく処理される', async () => {
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as PrefChartMock
       store.selectedPrefectures = [2]
       await vm.setSeries()
       expect(vm.chartOptions.series[0].id).toBe(2)
