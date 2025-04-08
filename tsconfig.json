@@ -4,8 +4,10 @@
   "compilerOptions": {
     "types": [
       "@pinia/testing",
-      "vitest/globals"
+      "vitest/globals",
+      "nuxt"
     ],
+    "module": "ESNext",
     "paths": {
       "~/*": ["./*"],
       "@/*": ["./*"]

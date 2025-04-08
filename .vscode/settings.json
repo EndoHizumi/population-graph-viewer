@@ -1,8 +1,16 @@
 {
     "cSpell.words": [
-        "Embla",
-        "highcharts",
-        "nuxt",
-        "RESAS"
-    ]
+      "aomori",
+      "domcontentloaded",
+      "Embla",
+      "highcharts",
+      "iwate",
+      "nuxt",
+      "RESAS",
+      "whatwg"
+    ],
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
 }

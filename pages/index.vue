@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
 import { usePrefectureStore } from '~/stores/prefecture'
-const prefectureStore = usePrefectureStore();
+const prefectureStore = usePrefectureStore()
 
 onBeforeMount(async() => {
-  await prefectureStore.fetchPrefectures();
-});
+  await prefectureStore.fetchPrefectures()
+})
 </script>
 
 <template>

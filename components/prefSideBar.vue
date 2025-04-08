@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { usePrefectureStore } from '~/stores/prefecture';
+import { storeToRefs } from 'pinia'
+import { usePrefectureStore } from '~/stores/prefecture'
 
-const prefectureStore = usePrefectureStore();
-const { prefecturesList, isLoading } = storeToRefs(prefectureStore);
+const prefectureStore = usePrefectureStore()
+const { prefecturesList } = storeToRefs(prefectureStore)
 
 const onClick = (event: { id: number, isClicked: boolean }) => {
-  const { id, isClicked } = event;
+  const { id, isClicked } = event
   
   // 配列を新しい参照に置き換えて更新
   if (isClicked) {
     // 選択された場合は追加（重複を防ぐ）
     if (!prefectureStore.selectedPrefectures.includes(id)) {
-      prefectureStore.selectedPrefectures = [...prefectureStore.selectedPrefectures, id];
+      prefectureStore.selectedPrefectures = [...prefectureStore.selectedPrefectures, id]
     }
   } else {
     // 選択解除の場合は削除
     prefectureStore.selectedPrefectures = prefectureStore.selectedPrefectures.filter(
       prefId => prefId !== id
-    );
+    )
   }
-};
+}
 </script>
 
 <template>
@@ -28,8 +28,8 @@ const onClick = (event: { id: number, isClicked: boolean }) => {
     <div class="side-bar-item-content flex flex-col gap-2 pt-4 justify-center items-center">
         <legend-button
           v-for="prefecture in prefecturesList"
-          :key="prefecture.prefCode"
           :id="prefecture.prefCode"
+          :key="prefecture.prefCode"
           :name="prefecture.prefName"
           @click="onClick"
         />

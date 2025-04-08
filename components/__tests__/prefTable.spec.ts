@@ -2,17 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import PrefTable from '../prefTable.vue'
-import { usePrefectureStore } from '~/stores/prefecture'
 import type { PopulationCompositionPerYear, PopulationDataItem, YearlyData } from '~/types/response'
 
 // モックデータ
-const mockPrefecturesList = [
+const prefecturesList = [
   { prefCode: 1, prefName: '北海道' },
   { prefCode: 2, prefName: '青森県' },
   { prefCode: 3, prefName: '岩手県' }
 ]
 
-const mockYearlyData: YearlyData[] = [
+const yearlyDataList: YearlyData[] = [
   {
     year: 2015,
     value: 5000000
@@ -27,37 +26,36 @@ const mockYearlyData: YearlyData[] = [
   }
 ]
 
-const mockPopulationDataItem: PopulationDataItem = {
+const populationDataItem: PopulationDataItem = {
   label: '総人口',
-  data: mockYearlyData
+  data: yearlyDataList
 }
 
-const mockYearList = [2015, 2020, 2025]
+const yearList = [2015, 2020, 2025]
 
-const mockPopulationData: {[prefCode: number]: PopulationCompositionPerYear} = {
+const populationData: {[prefCode: number]: PopulationCompositionPerYear} = {
   1: {
     boundaryYear: 2000,
     data: [
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem
+      populationDataItem,
+      populationDataItem,
+      populationDataItem,
+      populationDataItem
     ]
   },
   2: {
     boundaryYear: 2000,
     data: [
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem,
-      mockPopulationDataItem
+      populationDataItem,
+      populationDataItem,
+      populationDataItem,
+      populationDataItem
     ]
   }
 }
 
 describe('PrefTable', () => {
-  let wrapper: any
-
+  let wrapper: ReturnType<typeof mount>
   const createComponent = (initialState = {}) => {
     return mount(PrefTable, {
       global: {
@@ -67,9 +65,9 @@ describe('PrefTable', () => {
             initialState: {
               prefecture: {
                 selectedPrefectures: [],
-                prefecturesList: mockPrefecturesList,
-                yearList: mockYearList,
-                populationData: mockPopulationData,
+                prefecturesList: prefecturesList,
+                yearList: yearList,
+                populationData: populationData,
                 isLoading: false,
                 currentTab: 0,
                 ...initialState
