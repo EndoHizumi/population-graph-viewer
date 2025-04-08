@@ -9,10 +9,10 @@ onBeforeMount(async() => {
 </script>
 
 <template>
-  <div class="container w-full">
+  <div class="container">
     <app-header />
     <div class="content flex flex-row">
-      <div class="chart flex-2 flex flex-col m-[10px] gap-2 relative">
+      <div class="chart max-w-full flex-2 flex flex-col m-[10px] relative">
         <pref-chart/>
         <pref-table/>
       </div>
